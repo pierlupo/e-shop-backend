@@ -1,11 +1,14 @@
 package com.eShop.controller;
 
 
+import com.eShop.exceptions.AlreadyExistsException;
+import com.eShop.request.CreateUserRequest;
 import com.eShop.request.LoginRequest;
 import com.eShop.response.ApiResponse;
 import com.eShop.response.JwtResponse;
 import com.eShop.security.jwt.JwtUtils;
 import com.eShop.security.user.ShopUserDetails;
+import com.eShop.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,8 @@ public class AuthController {
 
     private final JwtUtils jwtUtils;
 
+    private final UserService userService;
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -44,6 +49,27 @@ public class AuthController {
             return ResponseEntity.ok(new ApiResponse("Login successful", jwtResponse));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse( e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequest request) {
+        try {
+            // 1. Create user
+            userService.createUser(request);
+            // 2. Authenticate user
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+            // 3. Set context and generate token
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateTokenForUser(authentication);
+            ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
+            // 4. Return response
+            return ResponseEntity.ok(new ApiResponse("User registered successfully",
+                    new JwtResponse(userDetails.getId(), jwt)));
+        } catch (AlreadyExistsException ex) {
+            return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
         }
     }
 }
