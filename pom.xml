@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.dailycodework</groupId>
-	<artifactId>dream-shops</artifactId>
+	<artifactId>e-shop</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>dream-shops</name>
 	<description>A Simple Ecommerce demo app</description>
