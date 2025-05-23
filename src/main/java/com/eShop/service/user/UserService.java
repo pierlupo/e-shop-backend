@@ -1,6 +1,5 @@
 package com.eShop.service.user;
 
-import com.dailycodework.dreamshops.dto.*;
 import com.eShop.dto.*;
 import com.eShop.exceptions.AlreadyExistsException;
 import com.eShop.exceptions.ResourceNotFoundException;
