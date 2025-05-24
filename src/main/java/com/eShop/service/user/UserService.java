@@ -42,8 +42,8 @@ public class UserService implements IUserService {
                     User user = new User();
                     user.setEmail(request.getEmail());
                     user.setPassword(passwordEncoder.encode(request.getPassword()));
-                    user.setFirstName(request.getFirstName());
-                    user.setLastName(request.getLastName());
+                    user.setFirstName(request.getFirstname());
+                    user.setLastName(request.getLastname());
                     return userRepository.save(user);
                 }).orElseThrow(()-> new AlreadyExistsException("This " + request.getEmail() + " already exists!"));
     }

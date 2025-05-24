@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class CreateUserRequest {
 
-    private String firstName;
+    private String firstname;
 
-    private String lastName;
+    private String lastname;
 
     private String email;
 
