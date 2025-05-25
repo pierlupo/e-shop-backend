@@ -16,7 +16,7 @@ public class JwtResponse {
 
     public JwtResponse(Long id, String jwt) {
         this.user = new UserDto();
-        this.user.setUserId(id);
+        this.user.setId(id);
         this.token = jwt;
     }
 }
