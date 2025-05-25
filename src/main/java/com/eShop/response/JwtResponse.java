@@ -1,5 +1,6 @@
 package com.eShop.response;
 
+import com.eShop.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtResponse {
 
-    private Long id;
+    private UserDto user;
 
     private String token;
 
+    public JwtResponse(Long id, String jwt) {
+        this.user = new UserDto();
+        this.user.setUserId(id);
+        this.token = jwt;
+    }
 }

@@ -42,8 +42,8 @@ public class UserService implements IUserService {
                     User user = new User();
                     user.setEmail(request.getEmail());
                     user.setPassword(passwordEncoder.encode(request.getPassword()));
-                    user.setFirstName(request.getFirstname());
-                    user.setLastName(request.getLastname());
+                    user.setFirstname(request.getFirstname());
+                    user.setLastname(request.getLastname());
                     return userRepository.save(user);
                 }).orElseThrow(()-> new AlreadyExistsException("This " + request.getEmail() + " already exists!"));
     }
@@ -52,8 +52,8 @@ public class UserService implements IUserService {
     public User updateUser(UserUpdateRequest request, Long userId) {
         return userRepository.findById(userId)
                 .map(existingUser-> {
-                    existingUser.setFirstName(request.getFirstName());
-                    existingUser.setLastName(request.getLastName());
+                    existingUser.setFirstname(request.getFirstname());
+                    existingUser.setLastname(request.getLastname());
                     return userRepository.save(existingUser);
                 }).orElseThrow(()->  new ResourceNotFoundException("User not found!"));
     }

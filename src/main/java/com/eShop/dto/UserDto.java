@@ -10,9 +10,9 @@ public class UserDto {
 
     private Long userId;
 
-    private String firstName;
+    private String firstname;
 
-    private String lastName;
+    private String lastname;
 
     private String email;
 

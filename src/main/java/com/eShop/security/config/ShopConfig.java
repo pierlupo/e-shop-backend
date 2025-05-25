@@ -31,7 +31,7 @@ import java.util.List;
 public class ShopConfig {
 
     private static final List<String> SECURED_URLS =
-            List.of("/api/v1/carts/**","/api/v1/cartItems/**","/api/v1/users/**");
+            List.of("/api/v1/carts/**","/api/v1/cartItems/**");
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final JwtUtils jwtUtils;

@@ -53,8 +53,8 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
                 continue;
             }
             User user = new User();
-            user.setFirstName("The User");
-            user.setLastName("User"+i);
+            user.setFirstname("The User");
+            user.setLastname("User"+i);
             user.setEmail(defaultEmail);
             user.setPassword(passwordEncoder.encode( "123456" ) );
             user.setRoles(List.of(userRole));
@@ -70,8 +70,8 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
                 continue;
             }
             User user = new User();
-            user.setFirstName("The Admin");
-            user.setLastName("Admin"+i);
+            user.setFirstname("The Admin");
+            user.setLastname("Admin"+i);
             user.setEmail(defaultEmail);
             user.setPassword(passwordEncoder.encode( "123456" ) );
             user.setRoles(List.of(adminRole));

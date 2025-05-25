@@ -1,7 +1,9 @@
 package com.eShop.controller;
 
 
+import com.eShop.dto.UserDto;
 import com.eShop.exceptions.AlreadyExistsException;
+import com.eShop.model.User;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.LoginRequest;
 import com.eShop.response.ApiResponse;
@@ -45,7 +47,9 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateTokenForUser(authentication);
             ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
-            JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt);
+            User user = userService.getUserById(userDetails.getId());
+            UserDto userDto = userService.convertToUserDto(user);
+            JwtResponse jwtResponse = new JwtResponse(userDto, jwt);
             return ResponseEntity.ok(new ApiResponse("Login successful", jwtResponse));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse( e.getMessage(), null));
