@@ -78,7 +78,9 @@ public class ShopConfig {
                     .csrf(AbstractHttpConfigurer::disable)
                     .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(auth -> auth.requestMatchers(SECURED_URLS.toArray(String[]::new)).authenticated()
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/uploads/**").permitAll()
+                            .requestMatchers(SECURED_URLS.toArray(String[]::new)).authenticated()
                             .anyRequest()
                             .permitAll());
             http.authenticationProvider(authenticationProvider());
