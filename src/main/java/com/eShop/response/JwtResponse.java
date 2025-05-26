@@ -1,9 +1,11 @@
 package com.eShop.response;
 
 import com.eShop.dto.UserDto;
+import com.eShop.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.modelmapper.ModelMapper;
 
 @Data
 @AllArgsConstructor
@@ -14,9 +16,9 @@ public class JwtResponse {
 
     private String token;
 
-    public JwtResponse(Long id, String jwt) {
-        this.user = new UserDto();
-        this.user.setId(id);
+    public JwtResponse(User user, String jwt, ModelMapper modelMapper) {
+        this.user = modelMapper.map(user, UserDto.class);
         this.token = jwt;
     }
+
 }

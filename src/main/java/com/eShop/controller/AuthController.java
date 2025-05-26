@@ -13,6 +13,7 @@ import com.eShop.security.user.ShopUserDetails;
 import com.eShop.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +39,8 @@ public class AuthController {
 
     private final UserService userService;
 
+    private final ModelMapper modelMapper;
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -60,7 +63,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequest request) {
         try {
             // 1. Create user
-            userService.createUser(request);
+            User newUser = userService.createUser(request);
             // 2. Authenticate user
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -71,7 +74,7 @@ public class AuthController {
             ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
             // 4. Return response
             return ResponseEntity.ok(new ApiResponse("User registered successfully",
-                    new JwtResponse(userDetails.getId(), jwt)));
+                    new JwtResponse(newUser, jwt, modelMapper)));
         } catch (AlreadyExistsException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
         }
