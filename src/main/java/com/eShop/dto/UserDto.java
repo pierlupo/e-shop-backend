@@ -20,4 +20,6 @@ public class UserDto {
 
     private CartDto cart;
 
+    private String avatarUrl;
+
 }

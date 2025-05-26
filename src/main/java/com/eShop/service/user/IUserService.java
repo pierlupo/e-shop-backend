@@ -4,6 +4,9 @@ import com.eShop.dto.UserDto;
 import com.eShop.model.User;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 public interface IUserService {
 
@@ -13,4 +16,5 @@ public interface IUserService {
     void deleteUser(Long userId);
     UserDto convertToUserDto(User user);
     User getAuthenticatedUser();
+    String uploadAvatar(Long userId, MultipartFile file) throws IOException;
 }

@@ -12,6 +12,7 @@ import com.eShop.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -62,6 +63,16 @@ public class UserController {
             return ResponseEntity.ok(new ApiResponse("Deleted user successfully", null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/{userId}/avatar")
+    public ResponseEntity<ApiResponse> uploadAvatar(@PathVariable Long userId, @RequestParam("avatar") MultipartFile avatarFile) {
+        try {
+            String avatarUrl = userService.uploadAvatar(userId, avatarFile);
+            return ResponseEntity.ok(new ApiResponse("Avatar uploaded successfully", avatarUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
         }
     }
 }
