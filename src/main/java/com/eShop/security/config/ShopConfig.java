@@ -74,7 +74,9 @@ public class ShopConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.cors(Customizer.withDefaults())
+            http
+                    .formLogin(AbstractHttpConfigurer::disable)
+                    .cors(Customizer.withDefaults())
                     .csrf(AbstractHttpConfigurer::disable)
                     .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
