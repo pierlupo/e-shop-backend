@@ -13,7 +13,6 @@ import com.eShop.security.user.ShopUserDetails;
 import com.eShop.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,7 +39,6 @@ public class AuthController {
 
     private final UserService userService;
 
-    private final ModelMapper modelMapper;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
