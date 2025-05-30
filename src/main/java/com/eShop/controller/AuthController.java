@@ -45,40 +45,34 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
-            Authentication authentication =authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    request.getEmail(),
-                    request.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = jwtUtils.generateTokenForUser(authentication);
-            ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
-            User user = userService.getUserById(userDetails.getId());
-            UserDto userDto = userService.convertToUserDto(user);
-            JwtResponse jwtResponse = new JwtResponse(userDto, jwt);
+            JwtResponse jwtResponse = authenticateAndGenerateToken(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(new ApiResponse("Login successful", jwtResponse));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse( e.getMessage(), null));
+            return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequest request) {
         try {
-            // 1. Create user
-            User newUser = userService.createUser(request);
-            // 2. Authenticate user
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
-            // 3. Set context and generate token
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = jwtUtils.generateTokenForUser(authentication);
-            ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
-            // 4. Return response
-            return ResponseEntity.ok(new ApiResponse("User registered successfully",
-                    new JwtResponse(newUser, jwt, modelMapper)));
+            userService.createUser(request);
+            JwtResponse jwtResponse = authenticateAndGenerateToken(request.getEmail(), request.getPassword());
+            return ResponseEntity.ok(new ApiResponse("User registered successfully", jwtResponse));
         } catch (AlreadyExistsException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
         }
+    }
+
+    private JwtResponse authenticateAndGenerateToken(String email, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateTokenForUser(authentication);
+        ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
+        User user = userService.getUserById(userDetails.getId());
+        UserDto userDto = userService.convertToUserDto(user);
+        return new JwtResponse(userDto, jwt);
     }
 
     @PostMapping("/validate")
