@@ -19,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,5 +79,12 @@ public class AuthController {
         } catch (AlreadyExistsException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
         }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validateToken(@AuthenticationPrincipal ShopUserDetails userDetails) {
+        User user = userService.getUserById(userDetails.getId());
+        UserDto userDto = userService.convertToUserDto(user);
+        return ResponseEntity.ok(new ApiResponse("Token is valid", userDto));
     }
 }
