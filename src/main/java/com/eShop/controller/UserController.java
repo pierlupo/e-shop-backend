@@ -75,4 +75,16 @@ public class UserController {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
         }
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse> getAuthenticatedUser() {
+        try {
+            User user = userService.getAuthenticatedUser();
+            UserDto userDto = userService.convertToUserDto(user);
+            return ResponseEntity.ok(new ApiResponse("Fetched authenticated user", userDto));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Failed to fetch authenticated user", null));
+        }
+    }
 }

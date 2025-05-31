@@ -74,6 +74,12 @@ public class UserService implements IUserService {
     @Override
     public UserDto convertToUserDto(User user) {
         UserDto userDto = modelMapper.map(user, UserDto.class);
+        if (user.getRoles() != null) {
+            List<RoleDto> roleDtos = user.getRoles().stream()
+                    .map(role -> new RoleDto(role.getId(), role.getName()))
+                    .toList();
+            userDto.setRoles(roleDtos);
+        }
         // Manually patch cart items (ModelMapper can't handle nested collections easily)
         if (user.getCart() != null && user.getCart().getItems() != null) {
             CartDto cartDto = userDto.getCart(); // already mapped base fields
@@ -148,4 +154,5 @@ public class UserService implements IUserService {
         userRepository.save(user);
         return avatarUrl;
     }
+
 }
