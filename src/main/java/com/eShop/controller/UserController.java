@@ -5,17 +5,20 @@ import com.eShop.dto.UserDto;
 import com.eShop.exceptions.AlreadyExistsException;
 import com.eShop.exceptions.ResourceNotFoundException;
 import com.eShop.model.User;
+import com.eShop.request.ChangePasswordRequest;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
 import com.eShop.response.ApiResponse;
 import com.eShop.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -73,6 +76,17 @@ public class UserController {
             return ResponseEntity.ok(new ApiResponse("Avatar uploaded successfully", avatarUrl));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/{userId}/change-password")
+    public ResponseEntity<ApiResponse> changePassword(@PathVariable Long userId, @RequestBody ChangePasswordRequest request) {
+        log.info("Received password change request for user ID: {}", userId);
+        boolean success = userService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
+        if (success) {
+            return ResponseEntity.ok(new ApiResponse("Password changed successfully", null));
+        } else {
+            return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse("Current password is incorrect", null));
         }
     }
 

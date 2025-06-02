@@ -155,4 +155,15 @@ public class UserService implements IUserService {
         return avatarUrl;
     }
 
+    @Override
+    public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = getUserById(userId);
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return true;
+    }
+
 }

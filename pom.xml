@@ -87,6 +87,10 @@
 			<artifactId>modelmapper-spring</artifactId>
 			<version>${modelmapper-spring.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
