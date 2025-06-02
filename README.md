@@ -130,4 +130,4 @@ The system supports roles for access control:
 
 ✍️ Author
 
-Developed by [Your Name].
+Developed by me.
