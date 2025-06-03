@@ -11,7 +11,7 @@ import com.eShop.response.ApiResponse;
 import com.eShop.response.JwtResponse;
 import com.eShop.security.jwt.JwtUtils;
 import com.eShop.security.user.ShopUserDetails;
-import com.eShop.service.EmailVerificationService;
+import com.eShop.service.email.EmailVerificationService;
 import com.eShop.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -81,6 +81,12 @@ public class AuthController {
         User user = userService.getUserById(userDetails.getId());
         UserDto userDto = userService.convertToUserDto(user);
         return ResponseEntity.ok(new ApiResponse("Token is valid", userDto));
+    }
+
+    @PostMapping("/{userId}/verify-email")
+    public ResponseEntity<?> sendVerificationEmail(@PathVariable Long userId) {
+        emailVerificationService.createAndSendToken(userId);
+        return ResponseEntity.ok(new ApiResponse("Verification email sent", null));
     }
 
     @PostMapping("/verify-email")
