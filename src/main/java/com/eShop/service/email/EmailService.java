@@ -42,25 +42,26 @@ public class EmailService implements IEmailService{
     @Override
     public void sendVerificationEmail(User user, String token) {
         String subject = "Verify your email";
-        String confirmationUrl =  frontendUrl + "/verify-email?token=" + token;
-        String body = "Click the link to verify your email: " + confirmationUrl;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject(subject);
-        message.setText(body);
-
+        String verificationUrl = frontendUrl + "/verify-email?token=" + token;
+        String body = String.format(
+                "Hello %s,\n\nPlease click the link below to verify your email:\n%s\n\nThis link will expire in 24 hours.\n\nThank you.",
+                user.getFirstname(), verificationUrl
+        );
         EmailLog.EmailLogBuilder logBuilder = EmailLog.builder()
                 .recipient(user.getEmail())
                 .subject(subject)
                 .body(body)
                 .sentAt(LocalDateTime.now());
         try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+            message.setSubject(subject);
+            message.setText(body);
+
             mailSender.send(message);
             logBuilder.success(true);
         } catch (Exception e) {
-            logBuilder.success(false)
-                    .errorMessage(e.getMessage());
+            logBuilder.success(false).errorMessage(e.getMessage());
         }
         emailLogRepository.save(logBuilder.build());
     }
