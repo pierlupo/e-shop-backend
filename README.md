@@ -1,6 +1,6 @@
 # E-Shop Backend
 
-This is the backend of the **E-Shop** project, built with **Spring Boot**, **Spring Security**, **JWT Authentication**, and **MySQL**. It provides a REST API for managing users, roles, products, and authentication logic for an e-commerce platform.
+This is the backend of an **E-Shop** project, built with **Spring Boot**, **Spring Security**, **JWT Authentication**, and **MySQL**. It provides a REST API for managing users, roles, products, and authentication logic for an e-commerce platform.
 
 ---
 

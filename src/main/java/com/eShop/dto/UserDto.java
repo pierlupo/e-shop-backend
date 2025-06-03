@@ -28,4 +28,6 @@ public class UserDto {
 
     private LocalDateTime registrationDate;
 
+    private boolean isEmailVerified;
+
 }

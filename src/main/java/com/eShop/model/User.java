@@ -24,8 +24,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "firstname")
     private String firstname;
 
+    @Column(name = "lastname")
     private String lastname;
 
     @NaturalId
@@ -54,5 +56,8 @@ public class User {
     protected void onCreate() {
         registrationDate = LocalDateTime.now();
     }
+
+    @Column(nullable = false)
+    private boolean isEmailVerified = false;
 
 }

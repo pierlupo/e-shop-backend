@@ -3,6 +3,7 @@ package com.eShop.controller;
 
 import com.eShop.dto.UserDto;
 import com.eShop.exceptions.AlreadyExistsException;
+import com.eShop.model.EmailVerificationToken;
 import com.eShop.model.User;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.LoginRequest;
@@ -10,6 +11,7 @@ import com.eShop.response.ApiResponse;
 import com.eShop.response.JwtResponse;
 import com.eShop.security.jwt.JwtUtils;
 import com.eShop.security.user.ShopUserDetails;
+import com.eShop.service.EmailVerificationService;
 import com.eShop.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +22,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -38,6 +39,8 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     private final UserService userService;
+
+    private final EmailVerificationService emailVerificationService;
 
 
     @PostMapping("/login")
@@ -79,4 +82,22 @@ public class AuthController {
         UserDto userDto = userService.convertToUserDto(user);
         return ResponseEntity.ok(new ApiResponse("Token is valid", userDto));
     }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        Optional<EmailVerificationToken> optionalToken = emailVerificationService.getToken(token);
+        if (optionalToken.isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Invalid token", null));
+        }
+        EmailVerificationToken emailToken = optionalToken.get();
+        if (emailVerificationService.isTokenExpired(emailToken)) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Token expired", null));
+        }
+        User user = emailToken.getUser();
+        user.setEmailVerified(true);
+        userService.saveUser(user);
+        emailVerificationService.deleteToken(emailToken);
+        return ResponseEntity.ok(new ApiResponse("Email verified successfully", null));
+    }
+
 }

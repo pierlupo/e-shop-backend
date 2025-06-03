@@ -49,6 +49,7 @@ public class UserService implements IUserService {
                     user.setPassword(passwordEncoder.encode(request.getPassword()));
                     user.setFirstname(request.getFirstname());
                     user.setLastname(request.getLastname());
+                    user.setEmailVerified(false);
                     return userRepository.save(user);
                 }).orElseThrow(()-> new AlreadyExistsException("This " + request.getEmail() + " already exists!"));
     }
@@ -164,6 +165,11 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return true;
+    }
+
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 
 }

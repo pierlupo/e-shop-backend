@@ -18,4 +18,5 @@ public interface IUserService {
     User getAuthenticatedUser();
     String uploadAvatar(Long userId, MultipartFile file) throws IOException;
     boolean changePassword(Long userId, String currentPassword, String newPassword);
+    void saveUser(User user);
 }
