@@ -46,22 +46,34 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
+            Optional<User> optionalUser = userService.findByEmail(request.getEmail());
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(UNAUTHORIZED)
+                        .body(new ApiResponse("Invalid credentials", null));
+            }
+            User user = optionalUser.get();
+            if (!user.isEmailVerified()) {
+                return ResponseEntity.status(UNAUTHORIZED)
+                        .body(new ApiResponse("Email not verified. Please check your inbox.", null));
+            }
             JwtResponse jwtResponse = authenticateAndGenerateToken(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(new ApiResponse("Login successful", jwtResponse));
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
-        }
+            } catch (AuthenticationException e) {
+                return ResponseEntity.status(UNAUTHORIZED)
+                        .body(new ApiResponse("Invalid credentials", null));
+            }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequest request) {
         try {
-            userService.createUser(request);
-            JwtResponse jwtResponse = authenticateAndGenerateToken(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok(new ApiResponse("User registered successfully", jwtResponse));
-        } catch (AlreadyExistsException ex) {
-            return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
-        }
+            User user = userService.createUser(request);
+            EmailVerificationToken token = emailVerificationService.createAndStoreToken(user.getId());
+            emailVerificationService.sendVerificationEmail(user, token.getToken());
+            return ResponseEntity.ok(new ApiResponse("User registered successfully. Please verify your email before logging in.", null));
+            } catch (AlreadyExistsException ex) {
+                return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
+            }
     }
 
     private JwtResponse authenticateAndGenerateToken(String email, String password) {
@@ -85,25 +97,23 @@ public class AuthController {
 
     @PostMapping("/{userId}/verify-email")
     public ResponseEntity<?> sendVerificationEmail(@PathVariable Long userId) {
-        emailVerificationService.createAndSendToken(userId);
+        EmailVerificationToken token = emailVerificationService.createAndStoreToken(userId);
+        User user = token.getUser();
+        emailVerificationService.sendVerificationEmail(user, token.getToken());
         return ResponseEntity.ok(new ApiResponse("Verification email sent", null));
     }
 
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
         Optional<EmailVerificationToken> optionalToken = emailVerificationService.getToken(token);
-        if (optionalToken.isEmpty()) {
-            return ResponseEntity.badRequest().body(new ApiResponse("Invalid token", null));
+        if (optionalToken.isEmpty() || emailVerificationService.isTokenExpired(optionalToken.get())) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Invalid or expired token", null));
         }
-        EmailVerificationToken emailToken = optionalToken.get();
-        if (emailVerificationService.isTokenExpired(emailToken)) {
-            return ResponseEntity.badRequest().body(new ApiResponse("Token expired", null));
-        }
-        User user = emailToken.getUser();
+        EmailVerificationToken tokenEntity = optionalToken.get();
+        User user = tokenEntity.getUser();
         user.setEmailVerified(true);
         userService.saveUser(user);
-        emailVerificationService.deleteToken(emailToken);
-        return ResponseEntity.ok(new ApiResponse("Email verified successfully", null));
+        emailVerificationService.deleteToken(tokenEntity);
+        return ResponseEntity.ok(new ApiResponse("Email verified successfully. You can now log in.", null));
     }
-
 }

@@ -40,6 +40,11 @@ public class UserService implements IUserService {
                 .orElseThrow(()->new ResourceNotFoundException("User not found!"));
     }
 
+    public Optional<User> findByEmail(String email) {
+        return Optional.ofNullable(userRepository.findByEmail(email));
+    }
+
+
     @Override
     public User createUser(CreateUserRequest request) {
         return Optional.of(request).filter(user-> !userRepository.existsByEmail(request.getEmail()))
@@ -171,5 +176,4 @@ public class UserService implements IUserService {
     public void saveUser(User user) {
         userRepository.save(user);
     }
-
 }
