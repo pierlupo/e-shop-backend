@@ -4,17 +4,23 @@ package com.eShop.controller;
 import com.eShop.dto.UserDto;
 import com.eShop.exceptions.AlreadyExistsException;
 import com.eShop.exceptions.ResourceNotFoundException;
+import com.eShop.model.EmailVerificationToken;
 import com.eShop.model.User;
 import com.eShop.request.ChangePasswordRequest;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
 import com.eShop.response.ApiResponse;
+import com.eShop.service.email.IEmailService;
+import com.eShop.service.email.IEmailVerificationService;
 import com.eShop.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -25,6 +31,10 @@ import static org.springframework.http.HttpStatus.*;
 public class UserController {
 
     private final IUserService userService;
+
+    private final IEmailVerificationService emailVerificationService;
+
+    private final IEmailService emailService;
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable Long userId) {
@@ -88,6 +98,28 @@ public class UserController {
         } else {
             return ResponseEntity.status(BAD_REQUEST).body(new ApiResponse("Current password is incorrect", null));
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(@RequestParam String email) {
+        Optional<User> userOptional = userService.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse("If this email exists, a reset link has been sent.", null));
+        }
+        User user = userOptional.get();
+        EmailVerificationToken token = emailVerificationService.createOrReplaceToken(user);
+        emailService.sendPasswordResetEmail(user, token.getToken());
+        return ResponseEntity.ok(new ApiResponse("Reset password link sent successfully", null));
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String token, @RequestBody String newPassword) {
+        boolean success = userService.resetPasswordWithToken(token, newPassword);
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse("Invalid or expired token", null));
+        }
+        return ResponseEntity.ok(new ApiResponse("Password reset successful", null));
     }
 
     @GetMapping("/me")

@@ -3,10 +3,12 @@ package com.eShop.service.user;
 import com.eShop.dto.*;
 import com.eShop.exceptions.AlreadyExistsException;
 import com.eShop.exceptions.ResourceNotFoundException;
+import com.eShop.model.EmailVerificationToken;
 import com.eShop.model.User;
 import com.eShop.repository.UserRepository;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
+import com.eShop.service.email.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
@@ -28,10 +30,9 @@ import java.util.Set;
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
-
     private final ModelMapper modelMapper;
-
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
 
 
     @Override
@@ -40,6 +41,7 @@ public class UserService implements IUserService {
                 .orElseThrow(()->new ResourceNotFoundException("User not found!"));
     }
 
+    @Override
     public Optional<User> findByEmail(String email) {
         return Optional.ofNullable(userRepository.findByEmail(email));
     }
@@ -171,6 +173,24 @@ public class UserService implements IUserService {
         userRepository.save(user);
         return true;
     }
+
+    @Override
+    public boolean resetPasswordWithToken(String token, String newPassword) {
+        Optional<EmailVerificationToken> optionalToken = emailVerificationService.getToken(token);
+        if (optionalToken.isEmpty()) {
+            return false;
+        }
+        EmailVerificationToken tokenEntity = optionalToken.get();
+        if (emailVerificationService.isTokenExpired(tokenEntity)) {
+            return false;
+        }
+        User user = tokenEntity.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        emailVerificationService.deleteToken(tokenEntity);
+        return true;
+    }
+
 
     @Override
     public void saveUser(User user) {
