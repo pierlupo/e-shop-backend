@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -35,6 +36,22 @@ public class UserController {
     private final IEmailVerificationService emailVerificationService;
 
     private final IEmailService emailService;
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        log.info("getAllUsers");
+        try {
+            List<User> users = userService.getAllUsers();
+            List<UserDto> userDtos = users.stream()
+                    .map(userService::convertToUserDto)
+                    .toList();
+            return ResponseEntity.ok(new ApiResponse("Fetched all users successfully", userDtos));
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Failed to fetch users", null));
+        }
+    }
+
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable Long userId) {
