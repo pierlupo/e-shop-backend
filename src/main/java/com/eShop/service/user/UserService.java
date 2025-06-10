@@ -8,6 +8,7 @@ import com.eShop.model.User;
 import com.eShop.repository.UserRepository;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
+import com.eShop.service.email.EmailService;
 import com.eShop.service.email.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,6 +33,7 @@ public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
     private final EmailVerificationService emailVerificationService;
 
 
@@ -72,6 +74,12 @@ public class UserService implements IUserService {
                 .map(existingUser-> {
                     existingUser.setFirstname(request.getFirstname());
                     existingUser.setLastname(request.getLastname());
+                    if (!existingUser.getEmail().equalsIgnoreCase(request.getEmail())) {
+                        existingUser.setEmail(request.getEmail());
+                        existingUser.setEmailVerified(false);
+                        var token = emailVerificationService.createOrReplaceToken(existingUser);
+                        emailService.sendVerificationEmail(existingUser, token.getToken());
+                    }
                     return userRepository.save(existingUser);
                 }).orElseThrow(()->  new ResourceNotFoundException("User not found!"));
     }

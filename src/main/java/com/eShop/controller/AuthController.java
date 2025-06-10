@@ -97,10 +97,16 @@ public class AuthController {
 
     @PostMapping("/{userId}/verify-email")
     public ResponseEntity<?> sendVerificationEmail(@PathVariable Long userId) {
-        EmailVerificationToken token = emailVerificationService.createAndStoreToken(userId);
-        User user = token.getUser();
-        emailVerificationService.sendVerificationEmail(user, token.getToken());
-        return ResponseEntity.ok(new ApiResponse("Verification email sent", null));
+        try {
+            EmailVerificationToken token = emailVerificationService.createAndStoreToken(userId);
+            User user = token.getUser();
+            emailVerificationService.sendVerificationEmail(user, token.getToken());
+            return ResponseEntity.ok(new ApiResponse("Verification email sent", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse("User not found with id: " + userId, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse("Internal server error", null));
+        }
     }
 
     @PostMapping("/verify-email")

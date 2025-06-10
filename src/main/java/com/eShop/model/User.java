@@ -30,7 +30,6 @@ public class User {
     @Column(name = "lastname")
     private String lastname;
 
-    @NaturalId
     @Column(unique = true, nullable = false)
     private String email;
 
