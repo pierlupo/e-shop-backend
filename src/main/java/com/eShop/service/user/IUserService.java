@@ -16,6 +16,9 @@ public interface IUserService {
     Optional<User> findByEmail(String email);
     User createUser(CreateUserRequest request);
     User updateUser(UserUpdateRequest request, Long userId);
+
+    User updateUserRoles(Long userId, List<String> roleNames);
+
     void deleteUser(Long userId);
     UserDto convertToUserDto(User user);
     User getAuthenticatedUser();

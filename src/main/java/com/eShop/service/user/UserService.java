@@ -4,7 +4,9 @@ import com.eShop.dto.*;
 import com.eShop.exceptions.AlreadyExistsException;
 import com.eShop.exceptions.ResourceNotFoundException;
 import com.eShop.model.EmailVerificationToken;
+import com.eShop.model.Role;
 import com.eShop.model.User;
+import com.eShop.repository.RoleRepository;
 import com.eShop.repository.UserRepository;
 import com.eShop.request.CreateUserRequest;
 import com.eShop.request.UserUpdateRequest;
@@ -31,6 +33,7 @@ import java.util.Set;
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -64,6 +67,9 @@ public class UserService implements IUserService {
                     user.setFirstname(request.getFirstname());
                     user.setLastname(request.getLastname());
                     user.setEmailVerified(false);
+                    Role userRole = roleRepository.findByName("ROLE_USER")
+                            .orElseThrow(() -> new IllegalStateException("ROLE_USER not found"));
+                    user.setRoles(List.of(userRole));
                     return userRepository.save(user);
                 }).orElseThrow(()-> new AlreadyExistsException("This " + request.getEmail() + " already exists!"));
     }
@@ -82,6 +88,18 @@ public class UserService implements IUserService {
                     }
                     return userRepository.save(existingUser);
                 }).orElseThrow(()->  new ResourceNotFoundException("User not found!"));
+    }
+
+    @Override
+    public User updateUserRoles(Long userId, List<String> roleNames) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Role> roles = roleRepository.findByNameIn(roleNames);
+        if (roles.size() != roleNames.size()) {
+            throw new IllegalArgumentException("One or more roles are invalid.");
+        }
+        user.setRoles(roles);
+        return userRepository.save(user);
     }
 
     @Override

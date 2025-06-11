@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -148,6 +149,21 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Failed to fetch authenticated user", null));
+        }
+    }
+
+    @PutMapping("/{userId}/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> updateUserRoles(
+            @PathVariable Long userId,
+            @RequestBody List<String> roleNames) {
+
+        try {
+            User user = userService.updateUserRoles(userId, roleNames);
+            UserDto userDto = userService.convertToUserDto(user);
+            return ResponseEntity.ok(new ApiResponse("User roles updated successfully", userDto));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 }
