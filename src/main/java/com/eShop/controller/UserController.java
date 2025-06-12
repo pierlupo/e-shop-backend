@@ -65,6 +65,23 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/add")
+    public ResponseEntity<ApiResponse> createUserByAdmin(@RequestBody CreateUserRequest request) {
+        try {
+            User user = userService.createUserWithoutPassword(request);
+            user.setEmailVerified(true);
+
+            EmailVerificationToken token = emailVerificationService.createOrReplaceToken(user);
+            emailService.sendPasswordResetEmail(user, token.getToken());
+
+            UserDto userDto = userService.convertToUserDto(user);
+            return ResponseEntity.ok(new ApiResponse("User created by admin. Password reset email sent.", userDto));
+        } catch (AlreadyExistsException e) {
+            return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> createUser(@RequestBody CreateUserRequest request) {
         try {
@@ -152,8 +169,8 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{userId}/roles")
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{userId}/roles")
     public ResponseEntity<ApiResponse> updateUserRoles(
             @PathVariable Long userId,
             @RequestBody List<String> roleNames) {

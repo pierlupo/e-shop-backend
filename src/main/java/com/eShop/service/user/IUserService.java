@@ -15,6 +15,9 @@ public interface IUserService {
     User getUserById(Long userId);
     Optional<User> findByEmail(String email);
     User createUser(CreateUserRequest request);
+
+    User createUserWithoutPassword(CreateUserRequest request);
+
     User updateUser(UserUpdateRequest request, Long userId);
 
     User updateUserRoles(Long userId, List<String> roleNames);

@@ -13,6 +13,7 @@ import com.eShop.request.UserUpdateRequest;
 import com.eShop.service.email.EmailService;
 import com.eShop.service.email.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements IUserService {
@@ -72,6 +74,21 @@ public class UserService implements IUserService {
                     user.setRoles(List.of(userRole));
                     return userRepository.save(user);
                 }).orElseThrow(()-> new AlreadyExistsException("This " + request.getEmail() + " already exists!"));
+    }
+
+    @Override
+    public User createUserWithoutPassword(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AlreadyExistsException("This " + request.getEmail() + " already exists!");
+        }
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setFirstname(request.getFirstname());
+        user.setLastname(request.getLastname());
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found"));
+        user.setRoles(List.of(userRole));
+        return userRepository.save(user);
     }
 
     @Override
@@ -217,6 +234,10 @@ public class UserService implements IUserService {
         }
         User user = tokenEntity.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
+        if (!user.isEmailVerified()) {
+            user.setEmailVerified(true);
+        }
+        log.info("User {} verified email via password reset token", user.getEmail());
         userRepository.save(user);
         emailVerificationService.deleteToken(tokenEntity);
         return true;
