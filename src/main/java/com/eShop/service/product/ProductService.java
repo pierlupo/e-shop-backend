@@ -146,7 +146,7 @@ public class ProductService implements IProductService {
 
         // Convert Category to CategoryDTO
         CategoryDto categoryDTO = new CategoryDto();
-//        categoryDTO.setId(product.getCategory().getId());
+        categoryDTO.setId(product.getCategory().getId());
         categoryDTO.setName(product.getCategory().getName());
         productDTO.setCategory(categoryDTO);
 

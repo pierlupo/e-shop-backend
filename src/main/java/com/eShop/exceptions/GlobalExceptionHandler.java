@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
-            String message = "You don't have permission to access this resource";
-            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+//            String message = "You don't have permission to access this resource";
+//            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
+//    }
 }
