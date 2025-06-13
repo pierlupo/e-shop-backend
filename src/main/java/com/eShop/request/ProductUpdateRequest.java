@@ -14,6 +14,6 @@ public class ProductUpdateRequest {
     private BigDecimal price;
     private int inventory;
     private String description;
-    private Category category;
+    private Long categoryId;
 
 }
